@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFFEF8">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="懒洋洋大厨">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-32.png">
+<title>懒洋洋当大厨</title>
+<style>
+/* ===== CSS Reset & Variables ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --white: #FFFFFF;
+  --bg: #FFFEF8;
+  --bg-warm: #FFF8EC;
+  --primary: #FFA62B;
+  --primary-light: #FFD4A3;
+  --primary-lighter: #FFF0DC;
+  --primary-dark: #E8870C;
+  --brown: #5C4033;
+  --brown-light: #8B6F5C;
+  --brown-lighter: #C4A884;
+  --text: #2D1B0E;
+  --text-secondary: #8B7355;
+  --text-light: #B5A088;
+  --pink: #FFB6C1;
+  --pink-light: #FFDDE3;
+  --meat-white: #FBE7D0;
+  --gold: #F5C518;
+  --gold-light: #FFF3B0;
+  --black-soft: #2D1B0E;
+  --border: #F0E6D6;
+  --shadow-sm: 0 1px 3px rgba(92, 64, 51, 0.06);
+  --shadow-md: 0 2px 8px rgba(92, 64, 51, 0.08);
+  --shadow-lg: 0 4px 16px rgba(92, 64, 51, 0.12);
+  --shadow-primary: 0 4px 14px rgba(255, 166, 43, 0.3);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --header-h: 64px;
+  --nav-h: 58px;
+  --max-w: 480px;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  background: #F5F0E8;
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+#app {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255, 166, 43, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(255, 182, 193, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 50% 95%, rgba(245, 197, 24, 0.04) 0%, transparent 40%);
+  box-shadow: 0 0 40px rgba(92, 64, 51, 0.06);
+  overflow: hidden;
+}
+
+/* ===== Background Decoration ===== */
+.bg-deco {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bg-deco svg {
+  position: absolute;
+  opacity: 0.025;
+}
+.bg-deco .deco-1 { top: 120px; right: -20px; width: 100px; transform: rotate(-15deg); }
+.bg-deco .deco-2 { bottom: 200px; left: -25px; width: 90px; transform: rotate(20deg); }
+.bg-deco .deco-3 { top: 45%; left: 30%; width: 60px; opacity: 0.015; }
+.bg-deco .deco-pot { top: 200px; left: -10px; width: 50px; opacity: 0.02; }
+.bg-deco .deco-utensil { bottom: 300px; right: -10px; width: 45px; opacity: 0.02; }
+
+/* ===== Header ===== */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 254, 248, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--header-h);
+  padding: 0 16px;
+  position: relative;
+}
+.header-logo {
+  width: 40px;
+  height: 44px;
+  flex-shrink: 0;
+  animation: sheepBounce 3s ease-in-out infinite;
+}
+.header-logo svg { width: 100%; height: 100%; }
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--brown);
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(255, 166, 43, 0.15);
+  white-space: nowrap;
+}
+.app-title .accent { color: var(--primary); }
+
+@keyframes sheepBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-2deg); }
+  75% { transform: translateY(-1px) rotate(1deg); }
+}
+
+/* ===== Main Content ===== */
+.app-main {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - var(--header-h) - var(--nav-h));
+  padding-bottom: calc(var(--nav-h) + 16px);
+}
+
+.page { display: none; }
+.page.page-active {
+  display: block;
+  animation: pageFadeIn 0.3s ease;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Menu Page ===== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 10px 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-bar:focus-within {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(255, 166, 43, 0.1);
+}
+.search-bar svg { width: 18px; height: 18px; color: var(--text-light); flex-shrink: 0; }
+.search-bar input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: var(--text);
+  width: 100%;
+  font-family: inherit;
+}
+.search-bar input::placeholder { color: var(--text-light); }
+
+.tag-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 16px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tag-filters::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-xl);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  user-select: none;
+}
+.filter-chip:active { transform: scale(0.95); }
+.filter-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+  box-shadow: var(--shadow-primary);
+}
+.filter-chip.all-active {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: var(--white);
+}
+
+.dishes-list {
+  padding: 8px 16px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== Dish Card ===== */
+.dish-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  transition: transform 0.15s, box-shadow 0.15s;
+  animation: cardSlideIn 0.35s ease backwards;
+}
+.dish-card:active { transform: scale(0.99); }
+
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dish-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.dish-emoji {
+  font-size: 1.6rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-lighter);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.dish-info { flex: 1; min-width: 0; }
+.dish-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+.dish-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dish-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.dish-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: background 0.15s;
+}
+.action-btn:active { background: var(--primary-lighter); }
+.action-btn.edit { color: var(--primary-dark); }
+.action-btn.delete { color: #C0392B; opacity: 0.6; }
+
+.dish-ingredients {
+  margin-top: 4px;
+}
+.ingredient-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ingredient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ingredient-chip {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-warm);
+  color: var(--brown-light);
+  border: 1px solid var(--border);
+}
+
+.video-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s;
+  cursor: pointer;
+}
+.video-link:active { transform: scale(0.98); opacity: 0.85; }
+.video-platform-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.video-text {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.video-play {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+.empty-state .empty-sheep {
+  width: 100px;
+  height: 110px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state h3 {
+  font-size: 1.1rem;
+  color: var(--brown);
+  margin-bottom: 6px;
+}
+.empty-state p {
+  font-size: 0.88rem;
+  color: var(--text-light);
+}
+
+/* ===== My Page ===== */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 20px;
+  background: linear-gradient(180deg, var(--bg-warm) 0%, transparent 100%);
+}
+.profile-logo {
+  width: 90px;
+  height: 100px;
+  margin-bottom: 8px;
+  animation: sheepBounce 3s ease-in-out infinite;
+}
+.profile-logo svg { width: 100%; height: 100%; }
+.profile-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--brown);
+  letter-spacing: 1px;
+}
+.profile-title .accent { color: var(--primary); }
+.profile-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.stats-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 16px 20px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.stat-num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.stat-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--border);
+  margin: 0 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-bottom: 10px;
+  margin-top: 8px;
+}
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brown);
+}
+.add-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--primary-lighter);
+  border: none;
+  padding: 5px 12px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.add-btn:active { transform: scale(0.95); }
+
+.tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px 7px 14px;
+  border-radius: var(--radius-xl);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  animation: tagPop 0.3s ease backwards;
+}
+@keyframes tagPop {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+.tag-item .tag-delete {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  transition: background 0.15s;
+}
+.tag-item .tag-delete:hover { background: rgba(255,255,255,0.5); }
+.tag-item .tag-delete:active { transform: scale(0.85); }
+
+.no-tags-hint {
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+.settings-list {
+  margin: 0 16px 24px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  text-align: left;
+}
+.setting-item:last-child { border-bottom: none; }
+.setting-item:active { background: var(--bg-warm); }
+.setting-item.danger { color: #C0392B; }
+.setting-item .setting-arrow {
+  color: var(--text-light);
+  font-size: 0.8rem;
+}
+
+/* ===== FAB ===== */
+.fab-wrap {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  right: 20px;
+  z-index: 50;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-wrap.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+@media (min-width: 481px) {
+  .fab-wrap { right: calc(50% - 220px); }
+}
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(255, 166, 43, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+  animation: fabPulse 2.5s ease-in-out infinite;
+}
+.fab:active { transform: scale(0.88); }
+.fab svg { width: 26px; height: 26px; color: white; }
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 14px rgba(255, 166, 43, 0.4); }
+  50% { box-shadow: 0 4px 20px rgba(255, 166, 43, 0.55); }
+}
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--max-w);
+  height: var(--nav-h);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(92, 64, 51, 0.06);
+}
+.nav-item {
+  flex: 1;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--text-light);
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: color 0.2s;
+  font-family: inherit;
+  position: relative;
+}
+.nav-item svg { width: 22px; height: 22px; transition: transform 0.2s; }
+.nav-item.active { color: var(--primary-dark); }
+.nav-item.active svg { transform: scale(1.1); }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--primary);
+}
+.nav-item:active { transform: scale(0.95); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(45, 27, 14, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.active {
+  display: flex;
+  animation: overlayFadeIn 0.2s ease;
+}
+@keyframes overlayFadeIn {
+  from { background: rgba(45, 27, 14, 0); }
+  to { background: rgba(45, 27, 14, 0.4); }
+}
+.modal-content {
+  background: var(--white);
+  width: 100%;
+  max-width: var(--max-w);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes modalSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-content.modal-sm { max-height: 60vh; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brown);
+}
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-warm);
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.modal-close:active { background: var(--primary-lighter); }
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px 20px;
+  flex-shrink: 0;
+}
+.btn-cancel, .btn-save, .btn-danger {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+.btn-cancel {
+  background: var(--bg-warm);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+}
+.btn-save {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  box-shadow: var(--shadow-primary);
+}
+.btn-danger {
+  background: #E74C3C;
+  color: var(--white);
+}
+.btn-cancel:active, .btn-save:active, .btn-danger:active { transform: scale(0.97); }
+.btn-save:disabled { opacity: 0.5; }
+
+/* Form Elements */
+.form-group { margin-bottom: 18px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brown);
+  margin-bottom: 8px;
+}
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+.form-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(255, 166, 43, 0.1);
+}
+.form-input::placeholder { color: var(--text-light); }
+
+.ingredient-input-wrap {
+  display: flex;
+  gap: 8px;
+}
+.ingredient-input-wrap .form-input { flex: 1; }
+.ingredient-add-btn {
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.ingredient-add-btn:active { background: var(--primary-light); }
+
+.ingredient-chips-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  min-height: 8px;
+}
+.ingredient-chip-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px 5px 12px;
+  background: var(--meat-white);
+  border-radius: var(--radius-xl);
+  font-size: 0.82rem;
+  color: var(--brown);
+  font-weight: 500;
+  animation: tagPop 0.25s ease;
+}
+.ingredient-chip-form .chip-remove {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(92, 64, 51, 0.1);
+  color: var(--brown);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+.ingredient-chip-form .chip-remove:active { transform: scale(0.85); }
+
+.tag-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag-select-chip {
+  padding: 7px 14px;
+  border-radius: var(--radius-xl);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  background: var(--white);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.tag-select-chip:active { transform: scale(0.95); }
+.tag-select-chip.selected {
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.no-tags-select {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  padding: 8px 0;
+}
+.no-tags-select a {
+  color: var(--primary-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.color-option {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid var(--white);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 0 2px var(--border);
+}
+.color-option:active { transform: scale(0.88); }
+.color-option.selected {
+  box-shadow: 0 0 0 2px var(--primary), 0 2px 8px rgba(0,0,0,0.15);
+  transform: scale(1.1);
+}
+
+.video-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Confirm Modal text */
+.confirm-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+  text-align: center;
+  padding: 8px 0;
+}
+.confirm-warning {
+  font-size: 0.82rem;
+  color: #C0392B;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 70px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--brown);
+  color: var(--white);
+  padding: 10px 24px;
+  border-radius: var(--radius-xl);
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.success { background: #27AE60; }
+.toast.error { background: #E74C3C; }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 0; height: 0; }
+.dish-image {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-warm);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== Image Upload Area ===== */
+.image-upload-area {
+  cursor: pointer;
+}
+.image-preview-container {
+  width: 100%;
+  height: 130px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-warm);
+  transition: border-color 0.2s, background 0.2s;
+}
+.image-preview-container:active {
+  border-color: var(--primary);
+  background: var(--primary-lighter);
+}
+.image-preview-container.has-image {
+  border-style: solid;
+  border-color: var(--primary-light);
+}
+.image-preview-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.image-placeholder {
+  text-align: center;
+  color: var(--text-light);
+}
+.image-placeholder svg {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+.image-placeholder span {
+  font-size: 0.82rem;
+  display: block;
+}
+.image-remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  line-height: 1;
+  backdrop-filter: blur(4px);
+}
+.image-remove-btn:active { transform: scale(0.85); }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Background Decoration -->
+  <div class="bg-deco" id="bg-deco"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="header-logo" id="header-logo"></div>
+      <h1 class="app-title">懒洋洋<span class="accent">当大厨</span></h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- Menu Page -->
+    <section id="page-menu" class="page page-active">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="搜索菜品或食材...">
+      </div>
+      <div class="tag-filters" id="tag-filters"></div>
+      <div class="dishes-list" id="dishes-list"></div>
+    </section>
+
+    <!-- My Page -->
+    <section id="page-mine" class="page">
+      <div class="profile-section">
+        <div class="profile-logo" id="profile-logo"></div>
+        <h2 class="profile-title">懒洋洋<span class="accent">当大厨</span></h2>
+        <p class="profile-subtitle">我的小厨房</p>
+      </div>
+      <div class="stats-section">
+        <div class="stat-item">
+          <span class="stat-num" id="dish-count">0</span>
+          <span class="stat-label">菜品</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="tag-count">0</span>
+          <span class="stat-label">标签</span>
+        </div>
+      </div>
+      <div class="section-header">
+        <span class="section-title">我的标签</span>
+        <button class="add-btn" id="add-tag-btn">+ 添加标签</button>
+      </div>
+      <div class="tags-grid" id="tags-grid"></div>
+      <div class="section-header">
+        <span class="section-title">设置</span>
+      </div>
+      <div class="settings-list">
+        <button class="setting-item" id="export-btn">
+          <span>导出数据备份</span>
+          <span class="setting-arrow">></span>
+        </button>
+        <button class="setting-item danger" id="clear-btn">
+          <span>清空所有数据</span>
+          <span class="setting-arrow">></span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- FAB -->
+  <div class="fab-wrap" id="fab-wrap">
+    <button class="fab" id="add-dish-btn" aria-label="添加菜品">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-page="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/>
+        <line x1="6" y1="17" x2="18" y2="17"/>
+      </svg>
+      <span>菜单</span>
+    </button>
+    <button class="nav-item" data-page="mine">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>我的</span>
+    </button>
+  </nav>
+
+  <!-- Dish Modal -->
+  <div class="modal-overlay" id="dish-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="dish-modal-title">添加菜品</h3>
+        <button class="modal-close" id="dish-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>菜品图片</label>
+          <div class="image-upload-area" id="image-upload-area">
+            <input type="file" id="dish-image-input" accept="image/*" style="display:none;">
+            <div class="image-preview-container" id="image-preview-container">
+              <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L6 21"/></svg>
+                <span>点击添加菜品图片</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>菜品名称</label>
+          <input type="text" class="form-input" id="dish-name" placeholder="输入菜品名称" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label>食材</label>
+          <div class="ingredient-input-wrap">
+            <input type="text" class="form-input" id="ingredient-input" placeholder="输入食材后按回车" maxlength="15">
+            <button class="ingredient-add-btn" id="add-ingredient-btn">添加</button>
+          </div>
+          <div class="ingredient-chips-form" id="ingredient-chips-form"></div>
+        </div>
+        <div class="form-group">
+          <label>选择标签</label>
+          <div class="tag-select" id="tag-select"></div>
+        </div>
+        <div class="form-group">
+          <label>视频链接（抖音/小红书等）</label>
+          <input type="text" class="form-input" id="dish-video" placeholder="粘贴视频链接" autocomplete="off">
+          <div id="video-platform-preview"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="dish-cancel">取消</button>
+        <button class="btn-save" id="dish-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Modal -->
+  <div class="modal-overlay" id="tag-modal">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>添加标签</h3>
+        <button class="modal-close" id="tag-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>标签名称</label>
+          <input type="text" class="form-input" id="tag-name" placeholder="输入标签名称" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>选择颜色</label>
+          <div class="color-picker" id="color-picker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="tag-cancel">取消</button>
+        <button class="btn-save" id="tag-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3 id="confirm-title">确认操作</h3>
+        <button class="modal-close" id="confirm-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text" id="confirm-message"></p>
+        <p class="confirm-warning" id="confirm-warning" style="display:none;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="confirm-cancel">取消</button>
+        <button class="btn-danger" id="confirm-ok">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+   懒洋洋当大厨 - 小厨房应用
+   ============================================================ */
+
+const STORAGE_KEY = 'lazyChef_data_v1';
+
+const TAG_COLORS = [
+  { bg: '#5C4033', text: '#FFFFFF', name: '深棕色' },
+  { bg: '#FFA62B', text: '#FFFFFF', name: '暖橙色' },
+  { bg: '#FFB6C1', text: '#5C4033', name: '淡粉色' },
+  { bg: '#FBE7D0', text: '#5C4033', name: '肉白色' },
+  { bg: '#F5C518', text: '#5C4033', name: '金黄色' },
+  { bg: '#8B6F5C', text: '#FFFFFF', name: '浅棕色' },
+  { bg: '#2D1B0E', text: '#FFFFFF', name: '黑色' },
+  { bg: '#FFD4A3', text: '#5C4033', name: '浅橙色' },
+];
+
+const FOOD_EMOJIS = ['🍳','🍲','🥘','🍛','🍜','🍝','🍱','🥗','🍕','🍔','🌮','🍣','🥟','🍢','🍧','🍰','🧁','🍩','🥧','🧇'];
+
+const DEFAULT_DATA = {
+  tags: [
+    { id: 't1', name: '家常菜', color: 0 },
+    { id: 't2', name: '快手菜', color: 1 },
+    { id: 't3', name: '甜品', color: 2 },
+    { id: 't4', name: '硬菜', color: 4 },
+    { id: 't5', name: '早餐', color: 3 },
+    { id: 't6', name: '减脂餐', color: 5 },
+  ],
+  dishes: [
+    {
+      id: 'd1',
+      name: '番茄炒蛋',
+      ingredients: ['番茄', '鸡蛋', '葱花', '盐', '白糖'],
+      tagIds: ['t1', 't2', 't5'],
+      videoUrl: '',
+      emoji: '🍳',
+      createdAt: Date.now() - 86400000
+    },
+    {
+      id: 'd2',
+      name: '红烧排骨',
+      ingredients: ['排骨', '生抽', '老抽', '冰糖', '料酒', '八角', '桂皮'],
+      tagIds: ['t4', 't1'],
+      videoUrl: '',
+      emoji: '🥘',
+      createdAt: Date.now() - 43200000
+    },
+    {
+      id: 'd3',
+      name: '草莓牛奶西米露',
+      ingredients: ['西米', '牛奶', '草莓', '白糖'],
+      tagIds: ['t3'],
+      videoUrl: '',
+      emoji: '🍧',
+      createdAt: Date.now() - 3600000
+    }
+  ]
+};
+
+/* ===== State ===== */
+let state = {
+  data: { dishes: [], tags: [] },
+  currentPage: 'menu',
+  selectedTagIds: [],
+  searchQuery: '',
+  editingDishId: null,
+  tempIngredients: [],
+  tempTagIds: [],
+  tempImageData: null,
+  selectedColorIdx: 0,
+  confirmCallback: null
+};
+
+/* ===== Sheep SVG Generator ===== */
+function sheepSVG(size) {
+  const w = size === 'small' ? 120 : 120;
+  const h = size === 'small' ? 130 : 130;
+  return `<svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg">
+    <!-- Shadow -->
+    <ellipse cx="60" cy="122" rx="28" ry="4" fill="rgba(92,64,51,0.08)"/>
+    <!-- Wool body -->
+    <g>
+      <circle cx="60" cy="70" r="34" fill="#FFF3D6"/>
+      <circle cx="31" cy="64" r="15" fill="#FFF3D6"/>
+      <circle cx="89" cy="64" r="15" fill="#FFF3D6"/>
+      <circle cx="36" cy="88" r="13" fill="#FFF3D6"/>
+      <circle cx="84" cy="88" r="13" fill="#FFF3D6"/>
+      <circle cx="60" cy="44" r="19" fill="#FFF3D6"/>
+      <circle cx="46" cy="52" r="13" fill="#FFF3D6"/>
+      <circle cx="74" cy="52" r="13" fill="#FFF3D6"/>
+    </g>
+    <!-- Wool texture -->
+    <g stroke="#F0E0C0" stroke-width="1.2" fill="none" opacity="0.35" stroke-linecap="round">
+      <path d="M 35 56 Q 40 54 45 57"/>
+      <path d="M 68 50 Q 73 48 78 52"/>
+      <path d="M 30 74 Q 35 72 40 75"/>
+      <path d="M 80 74 Q 85 72 90 75"/>
+      <path d="M 50 40 Q 55 38 60 41"/>
+    </g>
+    <!-- Golden curl on top -->
+    <g>
+      <path d="M 58 32 Q 50 26 54 18 Q 58 10 50 5" stroke="#F5C518" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <circle cx="50" cy="5" r="4" fill="#F5C518"/>
+      <circle cx="50" cy="5" r="1.8" fill="#FFE066"/>
+    </g>
+    <!-- Face -->
+    <ellipse cx="60" cy="68" rx="23" ry="20" fill="#FFFDF7"/>
+    <!-- Sleepy eyes -->
+    <g stroke="#5C4033" stroke-width="2.5" fill="none" stroke-linecap="round">
+      <path d="M 48 64 Q 51.5 67 55 64"/>
+      <path d="M 65 64 Q 68.5 67 72 64"/>
+    </g>
+    <!-- Eyebrows -->
+    <g stroke="#8B6F5C" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4">
+      <path d="M 48 58 L 55 57"/>
+      <path d="M 65 57 L 72 58"/>
+    </g>
+    <!-- Pink cheeks -->
+    <ellipse cx="44" cy="73" rx="5" ry="3.5" fill="#FFB6C1" opacity="0.6"/>
+    <ellipse cx="76" cy="73" rx="5" ry="3.5" fill="#FFB6C1" opacity="0.6"/>
+    <!-- Nose -->
+    <ellipse cx="60" cy="74" rx="2.2" ry="1.8" fill="#FFB6C1" opacity="0.5"/>
+    <!-- Sleepy smile -->
+    <path d="M 55 79 Q 60 82.5 65 79" stroke="#5C4033" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Zzz -->
+    <g fill="#8B6F5C" opacity="0.3" font-family="sans-serif" font-weight="bold">
+      <text x="86" y="30" font-size="9">z</text>
+      <text x="93" y="22" font-size="12">Z</text>
+    </g>
+    <!-- Orange scarf -->
+    <g>
+      <path d="M 32 88 Q 60 99 88 88 L 88 100 Q 60 109 32 100 Z" fill="#FFA62B"/>
+      <path d="M 32 88 Q 60 99 88 88" stroke="#E8870C" stroke-width="1.5" fill="none"/>
+      <ellipse cx="60" cy="93" rx="4.5" ry="2.5" fill="#E8870C"/>
+      <g stroke="#E8870C" stroke-width="1.3" stroke-linecap="round">
+        <line x1="38" y1="100" x2="38" y2="105"/>
+        <line x1="48" y1="103" x2="48" y2="108"/>
+        <line x1="60" y1="105" x2="60" y2="110"/>
+        <line x1="72" y1="103" x2="72" y2="108"/>
+        <line x1="82" y1="100" x2="82" y2="105"/>
+      </g>
+    </g>
+  </svg>`;
+}
+
+function miniSheepSVG() {
+  return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" opacity="0.4">
+    <circle cx="40" cy="45" r="24" fill="#5C4033"/>
+    <circle cx="20" cy="40" r="10" fill="#5C4033"/>
+    <circle cx="60" cy="40" r="10" fill="#5C4033"/>
+    <circle cx="40" cy="28" r="13" fill="#5C4033"/>
+    <path d="M 38 18 Q 33 12 36 6" stroke="#5C4033" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="36" cy="6" r="2.5" fill="#5C4033"/>
+  </svg>`;
+}
+
+function potSVG() {
+  return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" opacity="0.4">
+    <path d="M 15 35 Q 15 30 20 30 L 60 30 Q 65 30 65 35 L 65 55 Q 65 62 58 62 L 22 62 Q 15 62 15 55 Z" fill="#5C4033"/>
+    <rect x="10" y="28" width="60" height="6" rx="3" fill="#5C4033"/>
+    <line x1="8" y1="40" x2="3" y2="40" stroke="#5C4033" stroke-width="3" stroke-linecap="round"/>
+    <line x1="72" y1="40" x2="77" y2="40" stroke="#5C4033" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="30" cy="48" r="3" fill="#FFA62B" opacity="0.5"/>
+    <circle cx="45" cy="50" r="2.5" fill="#FFB6C1" opacity="0.5"/>
+    <circle cx="50" cy="45" r="2" fill="#F5C518" opacity="0.5"/>
+  </svg>`;
+}
+
+/* ===== Data Layer ===== */
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.dishes && parsed.tags) {
+        state.data = parsed;
+        return;
+      }
+    }
+  } catch(e) { console.warn('Load data failed', e); }
+  state.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  saveData();
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+  } catch(e) { console.warn('Save data failed', e); }
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+/* ===== Video Platform Detection ===== */
+function getVideoPlatform(url) {
+  if (!url) return null;
+  const lower = url.toLowerCase().trim();
+  if (lower.includes('douyin.com') || lower.includes('v.douyin.com'))
+    return { name: '抖音', bg: '#000000', text: '#FFFFFF', icon: '🎵' };
+  if (lower.includes('xiaohongshu.com') || lower.includes('xhslink.com'))
+    return { name: '小红书', bg: '#FF2442', text: '#FFFFFF', icon: '📕' };
+  if (lower.includes('bilibili.com') || lower.includes('b23.tv'))
+    return { name: '哔哩哔哩', bg: '#FB7299', text: '#FFFFFF', icon: '📺' };
+  if (lower.includes('youtube.com') || lower.includes('youtu.be'))
+    return { name: 'YouTube', bg: '#FF0000', text: '#FFFFFF', icon: '▶️' };
+  if (lower.includes('kuaishou.com'))
+    return { name: '快手', bg: '#FF4906', text: '#FFFFFF', icon: '🎬' };
+  if (lower.includes('weixin.qq.com') || lower.includes('mp.weixin'))
+    return { name: '微信视频', bg: '#07C160', text: '#FFFFFF', icon: '💬' };
+  return { name: '视频链接', bg: '#5C4033', text: '#FFFFFF', icon: '🔗' };
+}
+
+/* ===== Tag helpers ===== */
+function getTagById(id) { return state.data.tags.find(t => t.id === id); }
+function getTagColor(idx) {
+  if (idx == null || idx < 0 || idx >= TAG_COLORS.length) return TAG_COLORS[0];
+  return TAG_COLORS[idx];
+}
+
+/* ===== Rendering ===== */
+function renderHeader() {
+  document.getElementById('header-logo').innerHTML = sheepSVG('small');
+  document.getElementById('profile-logo').innerHTML = sheepSVG('normal');
+}
+
+function renderBgDeco() {
+  const deco = document.getElementById('bg-deco');
+  deco.innerHTML = `
+    <div class="deco-1">${miniSheepSVG()}</div>
+    <div class="deco-2">${miniSheepSVG()}</div>
+    <div class="deco-3">${miniSheepSVG()}</div>
+    <div class="deco-pot">${potSVG()}</div>
+    <div class="deco-utensil">${potSVG()}</div>
+  `;
+}
+
+function renderTagFilters() {
+  const container = document.getElementById('tag-filters');
+  const allActive = state.selectedTagIds.length === 0;
+  let html = `<div class="filter-chip ${allActive ? 'all-active' : ''}" data-tag="all">全部</div>`;
+  state.data.tags.forEach(tag => {
+    const color = getTagColor(tag.color);
+    const isActive = state.selectedTagIds.includes(tag.id);
+    const style = isActive
+      ? `background:${color.bg};border-color:${color.bg};color:${color.text};box-shadow:0 2px 8px rgba(0,0,0,0.1);`
+      : '';
+    html += `<div class="filter-chip ${isActive ? 'active' : ''}" data-tag="${tag.id}" style="${style}">${escapeHtml(tag.name)}</div>`;
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const tagId = chip.dataset.tag;
+      if (tagId === 'all') {
+        state.selectedTagIds = [];
+      } else {
+        const idx = state.selectedTagIds.indexOf(tagId);
+        if (idx >= 0) state.selectedTagIds.splice(idx, 1);
+        else state.selectedTagIds.push(tagId);
+      }
+      renderTagFilters();
+      renderDishes();
+    });
+  });
+}
+
+function filterDishes() {
+  let dishes = [...state.data.dishes];
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    dishes = dishes.filter(d =>
+      d.name.toLowerCase().includes(q) ||
+      (d.ingredients || []).some(i => i.toLowerCase().includes(q))
+    );
+  }
+  if (state.selectedTagIds.length > 0) {
+    dishes = dishes.filter(d =>
+      (d.tagIds || []).some(t => state.selectedTagIds.includes(t))
+    );
+  }
+  dishes.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return dishes;
+}
+
+function renderDishes() {
+  const container = document.getElementById('dishes-list');
+  const dishes = filterDishes();
+
+  if (state.data.dishes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-sheep">${sheepSVG()}</div>
+        <h3>厨房还是空的</h3>
+        <p>点击右下角 + 添加第一道菜吧</p>
+      </div>`;
+    return;
+  }
+
+  if (dishes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-sheep">${sheepSVG()}</div>
+        <h3>没有找到菜品</h3>
+        <p>试试其他关键词或标签</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = dishes.map((dish, i) => {
+    const tags = (dish.tagIds || []).map(getTagById).filter(Boolean);
+    const tagsHtml = tags.map(t => {
+      const c = getTagColor(t.color);
+      return `<span class="dish-tag" style="background:${c.bg};color:${c.text};">${escapeHtml(t.name)}</span>`;
+    }).join('');
+
+    const ingredientsHtml = (dish.ingredients || []).map(ing =>
+      `<span class="ingredient-chip">${escapeHtml(ing)}</span>`
+    ).join('');
+
+    const platform = dish.videoUrl ? getVideoPlatform(dish.videoUrl) : null;
+    const videoHtml = platform ? `
+      <a class="video-link" data-url="${escapeHtml(dish.videoUrl)}" style="background:${platform.bg === '#000000' ? '#1a1a1a' : platform.bg};">
+        <span class="video-platform-badge" style="background:rgba(255,255,255,0.2);color:${platform.text};">${platform.icon} ${platform.name}</span>
+        <span class="video-text" style="color:${platform.text};">点击观看视频教程</span>
+        <span class="video-play" style="color:${platform.text};">▶</span>
+      </a>` : '';
+
+    const emoji = dish.emoji || '🍳';
+    const imageHtml = dish.imageData
+      ? `<div class="dish-image" style="background-image:url('${dish.imageData}');"></div>`
+      : `<div class="dish-emoji">${emoji}</div>`;
+
+    return `
+      <div class="dish-card" data-id="${dish.id}" style="animation-delay:${i * 0.05}s;">
+        <div class="dish-card-top">
+          ${imageHtml}
+          <div class="dish-info">
+            <h3 class="dish-name">${escapeHtml(dish.name)}</h3>
+            <div class="dish-tags">${tagsHtml || '<span style="font-size:0.78rem;color:var(--text-light);">无标签</span>'}</div>
+          </div>
+          <div class="dish-actions">
+            <button class="action-btn edit" data-edit="${dish.id}" title="编辑">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button class="action-btn delete" data-delete="${dish.id}" title="删除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        ${ingredientsHtml ? `
+          <div class="dish-ingredients">
+            <div class="ingredient-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 5.5V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.5c1.5-1 3-3 3-5.5a7 7 0 0 0-7-7Z"/><path d="M9 21h6"/></svg>
+              食材
+            </div>
+            <div class="ingredient-chips">${ingredientsHtml}</div>
+          </div>` : ''}
+        ${videoHtml}
+      </div>`;
+  }).join('');
+
+  // Event delegation for dish card actions
+  container.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDishModal(btn.dataset.edit);
+    });
+  });
+  container.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dish = state.data.dishes.find(d => d.id === btn.dataset.delete);
+      if (dish) {
+        showConfirm(
+          '删除菜品',
+          `确定要删除「${escapeHtml(dish.name)}」吗？`,
+          () => {
+            state.data.dishes = state.data.dishes.filter(d => d.id !== btn.dataset.delete);
+            saveData();
+            renderDishes();
+            renderStats();
+            showToast('已删除菜品', 'success');
+          }
+        );
+      }
+    });
+  });
+  container.querySelectorAll('[data-url]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const url = link.dataset.url;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  });
+}
+
+function renderTags() {
+  const container = document.getElementById('tags-grid');
+  if (state.data.tags.length === 0) {
+    container.innerHTML = '<div class="no-tags-hint">还没有标签，点击上方添加吧</div>';
+    return;
+  }
+  container.innerHTML = state.data.tags.map((tag, i) => {
+    const c = getTagColor(tag.color);
+    return `
+      <div class="tag-item" style="background:${c.bg};color:${c.text};animation-delay:${i * 0.04}s;">
+        <span>${escapeHtml(tag.name)}</span>
+        <button class="tag-delete" data-tag-delete="${tag.id}" title="删除标签">&times;</button>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('[data-tag-delete]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = getTagById(btn.dataset.tagDelete);
+      if (!tag) return;
+      const dishCount = state.data.dishes.filter(d => (d.tagIds || []).includes(tag.id)).length;
+      const msg = dishCount > 0
+        ? `标签「${escapeHtml(tag.name)}」被 ${dishCount} 道菜使用，删除后菜品将不再显示该标签。确定删除吗？`
+        : `确定要删除标签「${escapeHtml(tag.name)}」吗？`;
+      showConfirm('删除标签', msg, () => {
+        state.data.tags = state.data.tags.filter(t => t.id !== tag.id);
+        state.data.dishes.forEach(d => {
+          d.tagIds = (d.tagIds || []).filter(id => id !== tag.id);
+        });
+        state.selectedTagIds = state.selectedTagIds.filter(id => id !== tag.id);
+        saveData();
+        renderTags();
+        renderTagFilters();
+        renderDishes();
+        renderStats();
+        showToast('已删除标签', 'success');
+      });
+    });
+  });
+}
+
+function renderStats() {
+  document.getElementById('dish-count').textContent = state.data.dishes.length;
+  document.getElementById('tag-count').textContent = state.data.tags.length;
+}
+
+function renderAll() {
+  renderHeader();
+  renderBgDeco();
+  renderTagFilters();
+  renderDishes();
+  renderTags();
+  renderStats();
+}
+
+/* ===== Page Switching ===== */
+function switchPage(page) {
+  state.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
+  document.getElementById('page-' + page).classList.add('page-active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  document.getElementById('fab-wrap').classList.toggle('hidden', page !== 'menu');
+  if (page === 'mine') {
+    renderTags();
+    renderStats();
+  }
+}
+
+/* ===== Dish Modal ===== */
+function openDishModal(dishId) {
+  state.editingDishId = dishId || null;
+  const modal = document.getElementById('dish-modal');
+  const title = document.getElementById('dish-modal-title');
+
+  if (dishId) {
+    const dish = state.data.dishes.find(d => d.id === dishId);
+    if (!dish) return;
+    title.textContent = '编辑菜品';
+    document.getElementById('dish-name').value = dish.name || '';
+    document.getElementById('dish-video').value = dish.videoUrl || '';
+    state.tempIngredients = [...(dish.ingredients || [])];
+    state.tempTagIds = [...(dish.tagIds || [])];
+    state.tempImageData = dish.imageData || null;
+  } else {
+    title.textContent = '添加菜品';
+    document.getElementById('dish-name').value = '';
+    document.getElementById('dish-video').value = '';
+    state.tempIngredients = [];
+    state.tempTagIds = [];
+    state.tempImageData = null;
+  }
+
+  renderIngredientChips();
+  renderTagSelect();
+  updateVideoPreview();
+  updateImagePreview();
+  document.getElementById('dish-image-input').value = '';
+  modal.classList.add('active');
+  setTimeout(() => document.getElementById('dish-name').focus(), 300);
+}
+
+function closeDishModal() {
+  document.getElementById('dish-modal').classList.remove('active');
+  state.editingDishId = null;
+  state.tempIngredients = [];
+  state.tempTagIds = [];
+  state.tempImageData = null;
+}
+
+/* ===== Image Upload ===== */
+function updateImagePreview() {
+  const container = document.getElementById('image-preview-container');
+  if (state.tempImageData) {
+    container.classList.add('has-image');
+    container.innerHTML = `<img src="${state.tempImageData}" alt="菜品图片">`;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'image-remove-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      state.tempImageData = null;
+      updateImagePreview();
+    };
+    container.appendChild(removeBtn);
+  } else {
+    container.classList.remove('has-image');
+    container.innerHTML = `
+      <div class="image-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5a2 2 0 0 0-2.8 0L6 21"/></svg>
+        <span>点击添加菜品图片</span>
+      </div>`;
+  }
+}
+
+function handleImageUpload(file) {
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片不能超过5MB', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 400;
+      let { width, height } = img;
+      if (width > height) {
+        if (width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+      } else {
+        if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      state.tempImageData = canvas.toDataURL('image/jpeg', 0.7);
+      updateImagePreview();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderIngredientChips() {
+  const container = document.getElementById('ingredient-chips-form');
+  container.innerHTML = state.tempIngredients.map((ing, i) =>
+    `<div class="ingredient-chip-form">
+      <span>${escapeHtml(ing)}</span>
+      <button class="chip-remove" data-idx="${i}">&times;</button>
+    </div>`
+  ).join('');
+  container.querySelectorAll('.chip-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.tempIngredients.splice(parseInt(btn.dataset.idx), 1);
+      renderIngredientChips();
+    });
+  });
+}
+
+function renderTagSelect() {
+  const container = document.getElementById('tag-select');
+  if (state.data.tags.length === 0) {
+    container.innerHTML = '<div class="no-tags-select">还没有标签，去「我的」页面添加吧</div>';
+    return;
+  }
+  container.innerHTML = state.data.tags.map(tag => {
+    const c = getTagColor(tag.color);
+    const selected = state.tempTagIds.includes(tag.id);
+    const style = selected
+      ? `background:${c.bg};color:${c.text};border-color:transparent;box-shadow:0 2px 6px rgba(0,0,0,0.1);`
+      : '';
+    return `<div class="tag-select-chip ${selected ? 'selected' : ''}" data-tag-id="${tag.id}" style="${style}">${escapeHtml(tag.name)}</div>`;
+  }).join('');
+  container.querySelectorAll('.tag-select-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const id = chip.dataset.tagId;
+      const idx = state.tempTagIds.indexOf(id);
+      if (idx >= 0) state.tempTagIds.splice(idx, 1);
+      else state.tempTagIds.push(id);
+      renderTagSelect();
+    });
+  });
+}
+
+function updateVideoPreview() {
+  const url = document.getElementById('dish-video').value.trim();
+  const preview = document.getElementById('video-platform-preview');
+  if (!url) { preview.innerHTML = ''; return; }
+  const platform = getVideoPlatform(url);
+  if (platform) {
+    preview.innerHTML = `<div class="video-preview-badge" style="background:${platform.bg};color:${platform.text};">
+      ${platform.icon} ${platform.name} · 链接已识别
+    </div>`;
+  }
+}
+
+function addIngredient() {
+  const input = document.getElementById('ingredient-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (state.tempIngredients.includes(val)) {
+    showToast('该食材已添加', 'error');
+    return;
+  }
+  state.tempIngredients.push(val);
+  input.value = '';
+  renderIngredientChips();
+  input.focus();
+}
+
+function saveDish() {
+  const name = document.getElementById('dish-name').value.trim();
+  const videoUrl = document.getElementById('dish-video').value.trim();
+  if (!name) {
+    showToast('请输入菜品名称', 'error');
+    document.getElementById('dish-name').focus();
+    return;
+  }
+  if (state.tempIngredients.length === 0) {
+    showToast('请至少添加一种食材', 'error');
+    return;
+  }
+
+  const dishData = {
+    name,
+    ingredients: [...state.tempIngredients],
+    tagIds: [...state.tempTagIds],
+    videoUrl,
+    imageData: state.tempImageData,
+    emoji: FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]
+  };
+
+  if (state.editingDishId) {
+    const dish = state.data.dishes.find(d => d.id === state.editingDishId);
+    if (dish) {
+      Object.assign(dish, dishData);
+    }
+    showToast('菜品已更新', 'success');
+  } else {
+    state.data.dishes.push({
+      id: uid(),
+      ...dishData,
+      createdAt: Date.now()
+    });
+    showToast('菜品已添加', 'success');
+  }
+
+  saveData();
+  closeDishModal();
+  renderDishes();
+  renderStats();
+}
+
+/* ===== Tag Modal ===== */
+function openTagModal() {
+  state.selectedColorIdx = Math.floor(Math.random() * TAG_COLORS.length);
+  document.getElementById('tag-name').value = '';
+  renderColorPicker();
+  document.getElementById('tag-modal').classList.add('active');
+  setTimeout(() => document.getElementById('tag-name').focus(), 300);
+}
+
+function closeTagModal() {
+  document.getElementById('tag-modal').classList.remove('active');
+}
+
+function renderColorPicker() {
+  const container = document.getElementById('color-picker');
+  container.innerHTML = TAG_COLORS.map((c, i) =>
+    `<div class="color-option ${i === state.selectedColorIdx ? 'selected' : ''}" data-idx="${i}" style="background:${c.bg};" title="${c.name}"></div>`
+  ).join('');
+  container.querySelectorAll('.color-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      state.selectedColorIdx = parseInt(opt.dataset.idx);
+      renderColorPicker();
+    });
+  });
+}
+
+function saveTag() {
+  const name = document.getElementById('tag-name').value.trim();
+  if (!name) {
+    showToast('请输入标签名称', 'error');
+    return;
+  }
+  if (state.data.tags.some(t => t.name === name)) {
+    showToast('标签名称已存在', 'error');
+    return;
+  }
+  state.data.tags.push({
+    id: uid(),
+    name,
+    color: state.selectedColorIdx
+  });
+  saveData();
+  closeTagModal();
+  renderTags();
+  renderTagFilters();
+  renderStats();
+  showToast('标签已添加', 'success');
+}
+
+/* ===== Confirm Modal ===== */
+function showConfirm(title, message, callback, warningText) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-message').innerHTML = message;
+  const warnEl = document.getElementById('confirm-warning');
+  if (warningText) {
+    warnEl.textContent = warningText;
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
+  state.confirmCallback = callback;
+  document.getElementById('confirm-modal').classList.add('active');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('active');
+  state.confirmCallback = null;
+}
+
+/* ===== Toast ===== */
+let toastTimer = null;
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+/* ===== Export Data ===== */
+function exportData() {
+  const dataStr = JSON.stringify(state.data, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date();
+  const dateStr = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`;
+  a.href = url;
+  a.download = `懒洋洋当大厨_数据备份_${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('数据已导出', 'success');
+}
+
+/* ===== Init ===== */
+function init() {
+  loadData();
+  renderAll();
+
+  // Bottom nav
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => switchPage(item.dataset.page));
+  });
+
+  // FAB
+  document.getElementById('add-dish-btn').addEventListener('click', () => openDishModal());
+
+  // Dish modal
+  document.getElementById('dish-close').addEventListener('click', closeDishModal);
+  document.getElementById('dish-cancel').addEventListener('click', closeDishModal);
+  document.getElementById('dish-save').addEventListener('click', saveDish);
+  document.getElementById('dish-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDishModal();
+  });
+
+  // Ingredient input
+  document.getElementById('ingredient-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addIngredient(); }
+  });
+  document.getElementById('add-ingredient-btn').addEventListener('click', addIngredient);
+
+  // Video URL preview
+  document.getElementById('dish-video').addEventListener('input', updateVideoPreview);
+
+  // Image upload
+  document.getElementById('image-upload-area').addEventListener('click', () => {
+    document.getElementById('dish-image-input').click();
+  });
+  document.getElementById('dish-image-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleImageUpload(file);
+    e.target.value = '';
+  });
+
+  // Tag modal
+  document.getElementById('add-tag-btn').addEventListener('click', openTagModal);
+  document.getElementById('tag-close').addEventListener('click', closeTagModal);
+  document.getElementById('tag-cancel').addEventListener('click', closeTagModal);
+  document.getElementById('tag-save').addEventListener('click', saveTag);
+  document.getElementById('tag-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeTagModal();
+  });
+
+  // Confirm modal
+  document.getElementById('confirm-close').addEventListener('click', closeConfirm);
+  document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+  document.getElementById('confirm-ok').addEventListener('click', () => {
+    if (state.confirmCallback) state.confirmCallback();
+    closeConfirm();
+  });
+  document.getElementById('confirm-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeConfirm();
+  });
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', (e) => {
+    state.searchQuery = e.target.value;
+    renderDishes();
+  });
+
+  // Settings
+  document.getElementById('export-btn').addEventListener('click', exportData);
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    showConfirm(
+      '清空所有数据',
+      '确定要清空所有菜品和标签吗？此操作不可撤销。',
+      () => {
+        state.data = { dishes: [], tags: [] };
+        state.selectedTagIds = [];
+        saveData();
+        renderAll();
+        showToast('所有数据已清空', 'success');
+      },
+      '⚠️ 所有菜品和标签将被永久删除'
+    );
+  });
+
+  // Close modals on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDishModal();
+      closeTagModal();
+      closeConfirm();
+    }
+  });
+
+  // Register Service Worker (PWA offline support)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
