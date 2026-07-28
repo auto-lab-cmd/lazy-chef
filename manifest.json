@@ -3,6 +3,7 @@
   "short_name": "懒洋洋大厨",
   "description": "我的小厨房 - 管理菜品和食谱",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FFFEF8",
